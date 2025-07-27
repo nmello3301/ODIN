@@ -1,0 +1,2 @@
+# ODIN
+Local automation application
