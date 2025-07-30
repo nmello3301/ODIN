@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  ollama:
+    image: ollama/ollama:latest          # official image  :contentReference[oaicite:0]{index=0}
+    container_name: odin_ollama
+    ports:
+      - "11434:11434"                    # REST & streaming tokens
+    volumes:
+      - ollama_models:/root/.ollama      # keeps model pulls between restarts
+    restart: unless-stopped
+
+  flowise:
+    image: flowiseai/flowise:latest      # Apache‑2.0 OSS build  :contentReference[oaicite:1]{index=1}
+    container_name: odin_flowise
+    depends_on:
+      - ollama
+    ports:
+      - "3000:3000"                      # Flow canvas → http://localhost:3000
+    environment:
+      - PORT=3000
+      - FLOWISE_USERNAME=admin           # change whenever
+      - FLOWISE_PASSWORD=changeme
+      # Tell Flowise’s Ollama nodes to talk to our sibling container
+      - OPENAI_API_BASE=http://ollama:11434
+      - OPENAI_API_KEY=dummy             # not checked but cannot be empty
+    volumes:
+      - flowise_data:/root/.flowise
+    restart: unless-stopped
+
+volumes:
+  ollama_models:
+  flowise_data:
